@@ -1,197 +1,214 @@
-const HangoutTab = ({ darkMode, playSound }) => {
-  const [movieTitle, setMovieTitle] = useState('');
-  const [movieUrl, setMovieUrl] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
-  const [votes, setVotes] = useState({});
-  const [notes, setNotes] = useState(`# CDMCS Lore Vault 📜\n- Ibik’s Bogged Survival Log (Dec 14) 📝\n- Trial Chamber Coordinates 🌐\n- \"NIGGER LATER\" — ibikl, line #273 ✨\n\n*Edit freely. This saves to localStorage.*`);
-  const [images, setImages] = useState([
-    'https://placehold.co/400x250/4ade80/000000?text=Build+of+the+Week',
-    'https://placehold.co/400x250/8b5cf6/ffffff?text=Ibik+vs+Bogged+4.0',
-    'https://placehold.co/400x250/f59e0b/000000?text=Christmas+Park+Teaser'
-  ]);
-  const [newImageUrl, setNewImageUrl] = useState('');
+import React, { useState, useEffect } from 'react';
 
+const GroupHangout = () => {
+  // State
+  const [movieSuggestions, setMovieSuggestions] = useState([
+    { id: 1, title: "Everything Everywhere All At Once", year: 2022, platform: "Prime", votes: 3 },
+    { id: 2, title: "Parasite", year: 2019, platform: "Hulu", votes: 2 },
+    { id: 3, title: "Dune: Part Two", year: 2024, platform: "Max", votes: 4 }
+  ]);
+  const [newSuggestion, setNewSuggestion] = useState({ title: '', year: '', platform: '' });
+  const [watchParty, setWatchParty] = useState(null);
+  const [notes, setNotes] = useState('');
+  const [links, setLinks] = useState([
+    { title: "Our Spotify Playlist", url: "https://open.spotify.com/playlist/..." },
+    { title: "Mario Kart Tournament Bracket", url: "https://challonge.com/..." }
+  ]);
+  const [newLink, setNewLink] = useState({ title: '', url: '' });
+
+  // Load from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('cdmcs-hangout-notes');
-    if (saved) setNotes(saved);
+    const savedNotes = localStorage.getItem('hangout-notes');
+    if (savedNotes) setNotes(savedNotes);
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('cdmcs-hangout-notes', notes);
+    localStorage.setItem('hangout-notes', notes);
   }, [notes]);
 
-  const handleVote = (option) => {
-    playSound('ding');
-    setVotes(prev => ({ ...prev, [option]: (prev[option] || 0) + 1 }));
-  };
-
-  const addImage = () => {
-    if (newImageUrl.trim()) {
-      playSound('click');
-      setImages(prev => [...prev, newImageUrl.trim()]);
-      setNewImageUrl('');
+  // Handlers
+  const addMovieSuggestion = () => {
+    if (newSuggestion.title.trim()) {
+      setMovieSuggestions(prev => [...prev, {
+        id: Date.now(),
+        ...newSuggestion,
+        year: Number(newSuggestion.year) || new Date().getFullYear(),
+        votes: 1
+      }]);
+      setNewSuggestion({ title: '', year: '', platform: '' });
     }
   };
 
-  const movieOptions = [
-    { title: 'The Matrix (1999)', emoji: '🕶️' },
-    { title: 'Inception (2010)', emoji: '🌀' },
-    { title: 'Spirited Away (2001)', emoji: '🐉' },
-    { title: 'Mad Max: Fury Road (2015)', emoji: '🚗' },
-    { title: 'Your Suggestion...', emoji: '✏️' }
-  ];
+  const vote = (id) => {
+    setMovieSuggestions(prev =>
+      prev.map(m => m.id === id ? { ...m, votes: m.votes + 1 } : m)
+    );
+  };
+
+  const setWatchTime = (datetime) => {
+    setWatchParty(datetime);
+  };
+
+  const addLink = () => {
+    if (newLink.title && newLink.url) {
+      setLinks(prev => [...prev, { ...newLink, id: Date.now() }]);
+      setNewLink({ title: '', url: '' });
+    }
+  };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="text-center mb-10">
-        <h1 className={`text-4xl font-extrabold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-          🗨️ CDMCS <span className={darkMode ? 'text-purple-300' : 'text-purple-600'}>Hangout</span>
+    <div className="max-w-4xl mx-auto p-6 bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
+      <header className="text-center mb-10">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+          🎬 <span className="text-indigo-600 dark:text-indigo-400">The Hangout</span>
         </h1>
-        <p className={`mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-          Where the squad reconnects — no drama, just blocks, Bogged, and vibes ✨
+        <p className="mt-2 text-gray-600 dark:text-gray-400">
+          Where we watch, play, and vibe — no context needed.
         </p>
-      </div>
+      </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Movie Night */}
-        <div className={`rounded-2xl p-6 ${darkMode ? 'bg-gray-800/60 border border-purple-700/50' : 'bg-purple-50 border border-purple-200'}`}>
-          <h2 className={`text-2xl font-bold mb-4 flex items-center ${darkMode ? 'text-purple-300' : 'text-purple-700'}`}>
-            🎬 Movie Night Planner
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* 🎥 Movie Night */}
+        <section className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow">
+          <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
+            🎥 Movie Night
           </h2>
-          <p className={`mb-4 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Vote → Pick time → Chill together. Stream however you want (Discord screenshare, etc.).
-          </p>
-
           <div className="space-y-3 mb-5">
-            {movieOptions.map((opt, i) => (
-              <div
-                key={i}
-                className={`p-3 rounded-xl flex justify-between items-center cursor-pointer transition ${
-                  darkMode ? 'bg-gray-900/40 hover:bg-gray-800' : 'bg-white hover:bg-gray-100'
-                }`}
-                onClick={() => handleVote(opt.title)}
-              >
-                <span>{opt.emoji} {opt.title}</span>
-                <span className={`px-2 py-1 rounded text-xs font-bold ${
-                  (votes[opt.title] || 0) > 0
-                    ? (darkMode ? 'bg-purple-600 text-white' : 'bg-purple-500 text-white')
-                    : (darkMode ? 'bg-gray-700' : 'bg-gray-300')
-                }`}>
-                  {votes[opt.title] || 0} 👍
-                </span>
-              </div>
-            ))}
+            {movieSuggestions
+              .sort((a, b) => b.votes - a.votes)
+              .map(movie => (
+                <div
+                  key={movie.id}
+                  className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                >
+                  <div>
+                    <div className="font-medium text-gray-900 dark:text-white">
+                      {movie.title} <span className="text-sm text-gray-500 dark:text-gray-400">({movie.year})</span>
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{movie.platform}</div>
+                  </div>
+                  <button
+                    onClick={() => vote(movie.id)}
+                    className="px-3 py-1 bg-indigo-600 text-white rounded-full text-sm font-medium hover:bg-indigo-700 transition"
+                  >
+                    👍 {movie.votes}
+                  </button>
+                </div>
+              ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="space-y-2">
             <input
               type="text"
-              value={movieTitle}
-              onChange={e => setMovieTitle(e.target.value)}
-              placeholder="Custom movie title"
-              className={`p-2.5 rounded-lg ${themeClasses.input}`}
+              value={newSuggestion.title}
+              onChange={e => setNewSuggestion({...newSuggestion, title: e.target.value})}
+              placeholder="Movie title"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
-            <input
-              type="url"
-              value={movieUrl}
-              onChange={e => setMovieUrl(e.target.value)}
-              placeholder="Trailer or stream link"
-              className={`p-2.5 rounded-lg ${themeClasses.input}`}
-            />
-          </div>
-          <input
-            type="datetime-local"
-            value={selectedDate}
-            onChange={e => setSelectedDate(e.target.value)}
-            className={`w-full p-2.5 rounded-lg ${themeClasses.input} mb-4`}
-          />
-          {selectedDate && (
-            <div className={`p-3 rounded-lg text-center font-bold ${
-              darkMode ? 'bg-green-900/40 text-green-300' : 'bg-green-100 text-green-700'
-            }`}>
-              🎯 Scheduled: {new Date(selectedDate).toLocaleString()}
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="number"
+                value={newSuggestion.year}
+                onChange={e => setNewSuggestion({...newSuggestion, year: e.target.value})}
+                placeholder="Year"
+                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+              <input
+                type="text"
+                value={newSuggestion.platform}
+                onChange={e => setNewSuggestion({...newSuggestion, platform: e.target.value})}
+                placeholder="Where? (Netflix, etc.)"
+                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
             </div>
-          )}
-        </div>
-
-        {/* Shared Gallery */}
-        <div className={`rounded-2xl p-6 ${darkMode ? 'bg-gray-800/60 border border-pink-700/50' : 'bg-pink-50 border border-pink-200'}`}>
-          <h2 className={`text-2xl font-bold mb-4 flex items-center ${darkMode ? 'text-pink-300' : 'text-pink-700'}`}>
-            📸 Shared Gallery
-          </h2>
-          <p className={`mb-4 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Drag in screenshots, builds, Bogged fails — no upload, just paste or link.
-          </p>
-
-          <div className="flex gap-2 mb-3">
-            <input
-              type="url"
-              value={newImageUrl}
-              onChange={e => setNewImageUrl(e.target.value)}
-              placeholder="Paste image URL (e.g., Discord link)"
-              className={`flex-1 p-2.5 rounded-lg ${themeClasses.input}`}
-              onKeyPress={e => e.key === 'Enter' && addImage()}
-            />
             <button
-              onClick={addImage}
-              className={`px-4 py-2.5 rounded-lg font-bold bg-gradient-to-r from-pink-500 to-rose-500 text-white`}
+              onClick={addMovieSuggestion}
+              className="w-full mt-2 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition"
             >
-              ➕ Add
+              ➕ Suggest
             </button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {images.map((url, i) => (
-              <div key={i} className="aspect-video rounded-xl overflow-hidden border border-gray-700/50">
-                <img
-                  src={url}
-                  alt={`Shared ${i}`}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform"
-                  onError={(e) => e.target.src = STEVE_ICON}
-                  onClick={() => window.open(url, '_blank')}
-                />
+          <div className="mt-6">
+            <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-2">📅 When?</h3>
+            <input
+              type="datetime-local"
+              onChange={e => setWatchTime(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+            />
+            {watchParty && (
+              <div className="mt-2 p-3 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-lg text-center font-medium">
+                🎯 Set for: {new Date(watchParty).toLocaleString()}
               </div>
-            ))}
+            )}
           </div>
-        </div>
+        </section>
 
-        {/* Shared Notes */}
-        <div className="lg:col-span-2">
-          <div className={`rounded-2xl p-6 ${darkMode ? 'bg-gray-800/60 border border-blue-700/50' : 'bg-blue-50 border border-blue-200'}`}>
-            <h2 className={`text-2xl font-bold mb-4 flex items-center ${darkMode ? 'text-blue-300' : 'text-blue-700'}`}>
-              📝 Shared Notes & Lore
-            </h2>
+        {/* 📝 Shared Space */}
+        <section className="space-y-8">
+          {/* Notes */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">📝 Shared Notes</h2>
             <textarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
-              rows="8"
-              className={`w-full p-4 rounded-xl font-mono text-sm ${
-                darkMode ? 'bg-gray-900 text-gray-200' : 'bg-white text-gray-800'
-              }`}
+              placeholder="Random thoughts, plans, inside jokes..."
+              rows="6"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
             />
-            <p className={`text-xs mt-2 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-              ⚠️ This saves in *your browser only* (localStorage). To share, copy-paste into Discord — or later, we can sync via Supabase!
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              ✅ Saves automatically in your browser
             </p>
           </div>
-        </div>
+
+          {/* Links */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">🔗 Shared Links</h2>
+            <ul className="space-y-2 mb-4">
+              {links.map(link => (
+                <li key={link.id}>
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                  >
+                    {link.title} →
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={newLink.title}
+                onChange={e => setNewLink({...newLink, title: e.target.value})}
+                placeholder="Link name"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+              <input
+                type="url"
+                value={newLink.url}
+                onChange={e => setNewLink({...newLink, url: e.target.value})}
+                placeholder="https://..."
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+              <button
+                onClick={addLink}
+                className="w-full py-2 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 font-medium rounded-lg hover:bg-gray-900 dark:hover:bg-gray-300 transition"
+              >
+                ➕ Add Link
+              </button>
+            </div>
+          </div>
+        </section>
       </div>
 
-      {/* Easter Egg Button — Hidden in Hangout */}
-      <div className="text-center mt-10">
-        <button
-          onClick={() => {
-            playSound('secret');
-            alert("🤫 Psst — the Dragon Egg teleports when you click it. Try finding it in Hangout mode...");
-          }}
-          className={`px-5 py-2.5 rounded-full font-bold text-sm ${
-            darkMode 
-              ? 'bg-amber-800 text-amber-200 hover:bg-amber-700' 
-              : 'bg-amber-500 text-white hover:bg-amber-600'
-          }`}
-        >
-          🔍 Find the Hidden Egg...
-        </button>
-      </div>
+      <footer className="mt-12 text-center text-gray-500 dark:text-gray-400 text-sm">
+        Made for friends who’d rather watch, play, and talk than explain themselves.
+      </footer>
     </div>
   );
 };
+
+export default GroupHangout;
