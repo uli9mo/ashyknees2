@@ -20,5 +20,4 @@ To confirm no tracking:
    - No analytics calls
 
 ## Contact for Security Concerns
-Discord: [Your Server Link]
-Purpose: Verification questions only
+msg me  4 proof (this is you ashborn)
